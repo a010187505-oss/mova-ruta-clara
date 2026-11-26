@@ -28,3 +28,7 @@ mobile/android/app/release/
 .DS_Store
 .vscode/
 *.log
+
+
+.venv/
+.streamlit/secrets.toml
