@@ -41,6 +41,7 @@ def revisar_foto(imagen, tipo, paso):
 
 @st.cache_data(show_spinner=False)
 def buscar_lugar(imagen, tipo):
+    """Guarda el lugar detectado para no repetir llamadas innecesarias."""
     return detectar_lugar(imagen, tipo)
 
 
@@ -110,20 +111,33 @@ def pantalla_inicio():
     mostrar_imagen("saludando")
     mumo_dice("¡Hola! Soy Mumo. Dime a dónde vas y te llevo paso a paso.")
 
-    origen = st.text_input("📍 ¿Dónde estás?", key="origen", placeholder="Ej. Metro Insurgentes")
-    destino = st.text_input("🏁 ¿A dónde vas?", key="destino", placeholder="Ej. UVM Campus Reforma")
+    # Usamos value= en lugar de key="origen" para poder rellenarlo desde "¿Dónde estoy?" sin error
+    origen = st.text_input(
+        "📍 ¿Dónde estás?",
+        value=st.session_state.origen,
+        placeholder="Ej. Metro Insurgentes",
+    )
+    destino = st.text_input(
+        "🏁 ¿A dónde vas?",
+        value=st.session_state.destino,
+        placeholder="Ej. UVM Campus Reforma",
+    )
     perfil = st.selectbox(
         "🧑‍🦽 ¿Qué necesitas?",
         ["silla de ruedas", "adulto mayor", "discapacidad intelectual o autismo", "sin necesidad especial"],
     )
     st.text_input("📞 Teléfono de mi familiar (opcional)", key="telefono")
 
+    # Guardamos lo que escribio la persona
+    st.session_state.origen = origen
+    st.session_state.destino = destino
+
     if st.button("🐾 Crear mi ruta", type="primary", use_container_width=True):
-        if not origen or not destino:
+        if not origen.strip() or not destino.strip():
             st.warning("Escribe de dónde sales y a dónde vas.")
         else:
             with st.spinner("Mumo está pensando tu ruta... 🐶"):
-                st.session_state.ruta = generar_ruta(origen, destino, perfil)
+                st.session_state.ruta = generar_ruta(origen.strip(), destino.strip(), perfil)
             st.session_state.paso = 0
             ir_a("pasos")
 
@@ -183,11 +197,12 @@ def pantalla_pasos():
         if foto:
             with st.spinner("Mumo está revisando la foto... 🐶"):
                 r = revisar_foto(foto.getvalue(), foto.type, paso)
-            titulo = {
+            titulos = {
                 "si": "✅ ¡Vas bien!",
                 "no": "⚠️ Parece que no es por aquí",
                 "no_seguro": "🤔 No estoy seguro",
-            }[r["va_bien"]]
+            }
+            titulo = titulos.get(r.get("va_bien"), "🤔 No estoy seguro")
             mostrar_imagen("pensativo", 110)
             st.subheader(titulo)
             st.write(f"**Lo que veo:** {r['que_veo']}")
