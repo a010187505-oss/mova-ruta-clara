@@ -1,0 +1,30 @@
+# Secretos y variables de entorno
+.env
+.env.*
+*.key
+*.jks
+key.properties
+
+# Python (backend)
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+
+# Flutter / Dart / Android (mobile)
+mobile/.dart_tool/
+mobile/.packages
+mobile/build/
+mobile/.flutter-plugins
+mobile/.flutter-plugins-dependencies
+mobile/android/.gradle/
+mobile/android/local.properties
+mobile/android/app/debug/
+mobile/android/app/profile/
+mobile/android/app/release/
+
+# Sistema y editor
+.DS_Store
+.vscode/
+*.log
