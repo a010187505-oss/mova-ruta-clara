@@ -1,0 +1,443 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mova Ruta Clara</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Mova: navegación accesible paso a paso con Mumo, un cachorro golden retriever, y la IA de Google Gemini.">
+<link rel="icon" type="image/png" href="img/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<style>
+/* Layout: igual que la app Flutter — una columna angosta centrada, una pantalla a la vez. */
+:root {
+  --bg: #FDF6FB;          /* fondo rosita */
+  --surface: #FFFFFF;
+  --soft: #F3CCDE;        /* rosa claro */
+  --soft-half: #F9E6EE;
+  --fg: #2D1630;          /* texto oscuro */
+  --muted: #6E5A6B;
+  --accent: #9E6899;      /* morado Mova */
+  --on-accent: #FFFFFF;
+  --gray-bg: #F5F5F5; --gray-line: #E0E0E0; --gray-fg: #616161;
+  --note-bg: #FFF9C4; --note-line: #FFE082; --note-fg: #4E342E;
+  --demo: #E0C060;
+  --ok: #2E7D32; --warn: #E65100; --unsure: #FF8F00;
+  --call: #E53935;
+  --font: "Atkinson Hyperlegible", "Segoe UI", Roboto, system-ui, sans-serif;
+  --base: 16px; --titulo: 22px; --grande: 19px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #1C1020; --surface: #28182C; --soft: #4A2C48; --soft-half: #352238;
+    --fg: #F7EAF3; --muted: #CDB3C8; --accent: #D8A3D1; --on-accent: #2D1630;
+    --gray-bg: #2A2030; --gray-line: #45304A; --gray-fg: #CDB3C8;
+    --note-bg: #3A3220; --note-line: #6B5A2A; --note-fg: #F3E3B5; --demo: #C9A93E;
+    --ok: #81C784; --warn: #FFB74D; --unsure: #FFD54F; --call: #E53935;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #1C1020; --surface: #28182C; --soft: #4A2C48; --soft-half: #352238;
+  --fg: #F7EAF3; --muted: #CDB3C8; --accent: #D8A3D1; --on-accent: #2D1630;
+  --gray-bg: #2A2030; --gray-line: #45304A; --gray-fg: #CDB3C8;
+  --note-bg: #3A3220; --note-line: #6B5A2A; --note-fg: #F3E3B5; --demo: #C9A93E;
+  --ok: #81C784; --warn: #FFB74D; --unsure: #FFD54F; --call: #E53935;
+  color-scheme: dark;
+}
+html.grande { --base: 20px; --titulo: 26px; --grande: 24px; }
+
+*, *::before, *::after { box-sizing: border-box; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--font); font-size: var(--base); line-height: 1.5; }
+img { max-width: 100%; display: block; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+p, h1, h2 { margin: 0; }
+h1, h2 { font-size: var(--titulo); line-height: 1.25; text-wrap: balance; }
+
+.app {
+  max-width: 560px; margin: 0 auto;
+  padding-block: 16px 24px;
+  padding-left: max(20px, env(safe-area-inset-left, 0px));
+  padding-right: max(20px, env(safe-area-inset-right, 0px));
+  display: grid; gap: 12px;
+}
+.pantalla { display: grid; gap: 12px; }
+
+/* Barra superior */
+.barra { display: flex; align-items: center; gap: 8px; }
+.logo { padding: 6px; background: var(--soft); border-radius: 12px; }
+.logo img { width: 32px; height: 32px; border-radius: 6px; }
+.marca { font-size: var(--titulo); font-weight: 700; color: var(--accent); }
+.switch { margin-left: auto; display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: calc(var(--base) - 2px); user-select: none; min-width: 0; }
+.switch input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.switch .track { width: 48px; height: 28px; border-radius: 99px; background: var(--soft); position: relative; flex: none; transition: background .2s; }
+.switch .track::after { content: ""; position: absolute; top: 4px; left: 4px; width: 20px; height: 20px; border-radius: 50%; background: var(--surface); box-shadow: 0 1px 3px rgb(0 0 0 / .3); transition: transform .2s; }
+.switch input:checked + .track { background: var(--accent); }
+.switch input:checked + .track::after { transform: translateX(20px); }
+.switch input:focus-visible + .track { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+/* Botones */
+.btn { width: 100%; min-height: 52px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 16px; border-radius: 14px; font: 700 var(--base) var(--font); cursor: pointer; border: 1.5px solid var(--accent); text-decoration: none; transition: filter .15s; }
+.btn:hover { filter: brightness(1.05); }
+.btn:disabled { opacity: .45; cursor: default; }
+.btn-lleno { background: var(--accent); color: var(--on-accent); }
+.btn-borde { background: transparent; color: var(--accent); }
+.btn-llamar { background: var(--call); border-color: var(--call); color: #fff; }
+.btn-grande { min-height: 60px; font-size: calc(var(--base) + 2px); }
+.fila { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+/* Mumo */
+.mumo-saluda { display: flex; align-items: flex-end; gap: 12px; }
+.mumo-saluda img { height: 120px; width: auto; border-radius: 16px; flex: none; }
+.burbuja { background: var(--soft); border-radius: 16px; padding: 14px; font-weight: 700; min-width: 0; }
+.mumo-dice { display: flex; gap: 10px; align-items: flex-start; background: var(--soft); border-radius: 14px; padding: 12px 14px; }
+.mumo-centro { display: grid; justify-items: center; gap: 8px; text-align: center; padding-block: 8px; }
+.mumo-centro img { border-radius: 20px; }
+.pensando { color: var(--accent); font-weight: 700; }
+.spinner { width: 36px; height: 36px; border-radius: 50%; border: 4px solid var(--soft); border-top-color: var(--accent); animation: gira 0.9s linear infinite; }
+@keyframes gira { to { transform: rotate(360deg); } }
+
+/* Formulario */
+.campo { display: grid; gap: 6px; }
+.campo label { font-weight: 700; }
+.input { position: relative; }
+.input span { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); pointer-events: none; }
+.input input, select { width: 100%; min-height: 52px; padding: 12px 14px 12px 44px; border: 1.5px solid var(--soft); border-radius: 12px; background: var(--surface); color: var(--fg); font: var(--base) var(--font); }
+select { padding-left: 14px; appearance: none; background-image: linear-gradient(45deg, transparent 50%, var(--accent) 50%), linear-gradient(135deg, var(--accent) 50%, transparent 50%); background-position: calc(100% - 22px) 50%, calc(100% - 16px) 50%; background-size: 6px 6px; background-repeat: no-repeat; }
+.input input:focus, select:focus { outline: none; border: 2px solid var(--accent); }
+.error { color: var(--warn); font-weight: 700; }
+
+/* Tarjetas */
+.tarjeta { background: var(--soft-half); border: 1px solid var(--soft); border-radius: 16px; padding: 18px; }
+.paso-principal { display: grid; justify-items: center; gap: 12px; text-align: center; }
+.paso-principal .emoji { font-size: 56px; line-height: 1; }
+.paso-principal p { font-size: var(--grande); font-weight: 700; }
+.dato { display: flex; gap: 10px; align-items: flex-start; padding: 14px; }
+.dato .ico { font-size: calc(var(--base) + 2px); }
+.progreso { display: flex; gap: 4px; }
+.progreso span { flex: 1; height: 6px; border-radius: 3px; background: var(--soft); }
+.progreso span.on { background: var(--accent); }
+.meta { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.chip-demo { background: var(--demo); color: #2D1630; border-radius: 20px; padding: 4px 10px; font-weight: 700; font-size: calc(var(--base) - 3px); flex: none; }
+.ruta-nombre { color: var(--muted); font-size: calc(var(--base) - 2px); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.aviso-amarillo { background: var(--note-bg); border: 1px solid var(--note-line); color: var(--note-fg); border-radius: 12px; padding: 12px; }
+.aviso-ia { background: var(--gray-bg); border: 1px solid var(--gray-line); color: var(--gray-fg); border-radius: 12px; padding: 12px; text-align: center; font-size: calc(var(--base) - 3px); margin-top: 8px; }
+.ayuda { color: var(--muted); }
+
+/* Foto */
+.zona-foto { display: grid; place-items: center; gap: 8px; min-height: 200px; border: 2px dashed var(--soft); background: var(--soft-half); border-radius: 16px; cursor: pointer; color: var(--muted); font-weight: 700; padding: 16px; text-align: center; }
+.zona-foto .cam { font-size: 48px; }
+.foto-previa { width: 100%; max-height: 260px; object-fit: cover; border-radius: 16px; }
+.resultado { display: grid; gap: 12px; }
+.resultado h2.si { color: var(--ok); } .resultado h2.no { color: var(--warn); } .resultado h2.no_seguro { color: var(--unsure); }
+.resultado .tarjeta { display: grid; gap: 4px; padding: 14px; }
+.nivel { display: inline-block; border-radius: 20px; padding: 2px 10px; font-weight: 700; font-size: calc(var(--base) - 2px); }
+.nivel.alta { background: #C8E6C9; color: #1B5E20; } .nivel.media { background: #FFE0B2; color: #E65100; } .nivel.baja { background: #FFCDD2; color: #B71C1C; }
+
+.llegaste h1 { color: var(--accent); text-align: center; }
+.estado-api { font-size: calc(var(--base) - 4px); color: var(--muted); text-align: center; }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="barra">
+    <div class="logo"><img src="img/logo.webp" alt="" width="32" height="32"></div>
+    <span class="marca">Mova</span>
+    <label class="switch" for="letra-grande">
+      <span aria-hidden="true">🔠</span><span>Letra grande</span>
+      <input type="checkbox" id="letra-grande">
+      <span class="track" aria-hidden="true"></span>
+    </label>
+  </header>
+
+  <a class="btn btn-llamar" id="btn-llamar" href="#" hidden>📞 Llamar a mi familiar <span id="tel-visible" style="font-weight:400"></span></a>
+
+  <main id="contenido" aria-live="polite"></main>
+
+  <p class="aviso-ia">⚠️ Mova usa inteligencia artificial y puede equivocarse. Verifica siempre con la señalización oficial.</p>
+  <p class="estado-api" id="estado-api"></p>
+</div>
+
+<input type="file" id="in-camara" accept="image/*" capture="environment" hidden>
+<input type="file" id="in-galeria" accept="image/*" hidden>
+
+<script>
+(function () {
+  "use strict";
+
+  // ══ Conexión con el servidor (api_server.py) ══════════════════
+  // Si el sitio lo sirve el mismo servidor (http://localhost:8000/sitio/), usa ese.
+  // Se puede cambiar con ?api=https://mi-servidor.com
+  var params = new URLSearchParams(location.search);
+  var API = params.get("api") ||
+    (location.pathname.indexOf("/sitio") === 0 ? location.origin : "http://localhost:8000");
+  API = API.replace(/\/$/, "");
+  var ESPERA_MS = 45000;
+
+  // ══ Respuestas de respaldo (iguales a la app Flutter) ════════
+  var RUTA_DEMO = {
+    pasos: [
+      { numero: 1, emoji: "🚪", instruccion: "Busca la salida con rampa.", referencia: "Busca el letrero verde que dice \"Salida\".", accesibilidad: "Con rampa" },
+      { numero: 2, emoji: "🛗", instruccion: "Usa el elevador para bajar al andén.", referencia: "Busca el símbolo azul de silla de ruedas.", accesibilidad: "Con elevador" },
+      { numero: 3, emoji: "🚇", instruccion: "Sube al primer vagón y viaja dos estaciones.", referencia: "Espera detrás de la línea amarilla.", accesibilidad: "Asientos reservados" },
+      { numero: 4, emoji: "🛗", instruccion: "Baja en Chapultepec y busca el elevador.", referencia: "Sigue los letreros de salida.", accesibilidad: "Con elevador" },
+      { numero: 5, emoji: "🏫", instruccion: "Sigue por Reforma hasta UVM Campus Reforma.", referencia: "La entrada tiene una rampa gris.", accesibilidad: "Banqueta amplia" }
+    ],
+    mensaje_mumo: "¡Guau! Lo logramos juntos. Estoy muy orgulloso de ti.",
+    aviso: "No pude conectarme con Gemini. Esta es una ruta de ejemplo."
+  };
+  var VOY_BIEN_RESPALDO = { va_bien: "no_seguro", que_veo: "No pude revisar la foto en este momento.", que_hacer: "Toma otra foto clara del letrero o pide ayuda cerca.", mensaje_mumo: "Guau, sin prisas. Intentemos de nuevo." };
+  var DONDE_RESPALDO = { lugar: "No pude reconocer el lugar.", pistas: "La foto no tiene letreros claros.", seguridad: "baja", que_hacer: "Toma una foto de un letrero o nombre de calle.", mensaje_mumo: "Guau, intentemos con otra foto." };
+
+  function conTiempo(promesa) {
+    return Promise.race([promesa, new Promise(function (_, no) { setTimeout(function () { no(new Error("tiempo")); }, ESPERA_MS); })]);
+  }
+  function pedirRuta(origen, destino, perfil) {
+    return conTiempo(fetch(API + "/api/ruta", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ origen: origen, destino: destino, perfil: perfil }) }))
+      .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then(function (d) { marcarApi(true); return d; })
+      .catch(function () { marcarApi(false); return JSON.parse(JSON.stringify(RUTA_DEMO)); });
+  }
+  function enviarFoto(ruta, archivo, extra, respaldo) {
+    var fd = new FormData();
+    fd.append("foto", archivo, archivo.name || "foto.jpg");
+    Object.keys(extra).forEach(function (k) { fd.append(k, extra[k]); });
+    return conTiempo(fetch(API + ruta, { method: "POST", body: fd }))
+      .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then(function (d) { marcarApi(true); return d; })
+      .catch(function () { marcarApi(false); return Object.assign({}, respaldo); });
+  }
+  function marcarApi(ok) {
+    document.getElementById("estado-api").textContent = ok ? "🟢 Conectado con Mumo" : "🟡 Sin conexión con el servidor: Mova usa respuestas de ejemplo.";
+  }
+
+  // ══ Estado (como estado_app.dart) ════════════════════════════
+  var estado = {
+    pantalla: "inicio", origen: "", destino: "", perfil: "Sin necesidad especial", telefono: "",
+    ruta: null, pasoActual: 0, cargando: false,
+    fotoVoyBien: null, resultadoVoyBien: null, fotoDonde: null, resultadoDonde: null, error: ""
+  };
+  try {
+    var guardado = JSON.parse(localStorage.getItem("mova-datos") || "{}");
+    ["origen", "destino", "perfil", "telefono"].forEach(function (k) { if (typeof guardado[k] === "string") estado[k] = guardado[k]; });
+  } catch (e) {}
+  function guardar() {
+    try { localStorage.setItem("mova-datos", JSON.stringify({ origen: estado.origen, destino: estado.destino, perfil: estado.perfil, telefono: estado.telefono })); } catch (e) {}
+  }
+
+  var PERFILES = ["Silla de ruedas", "Adulto mayor", "Discapacidad intelectual o autismo", "Sin necesidad especial"];
+  var MUMO = { saludando: "img/mumo_saludando.webp", pensando: "img/mumo_pensando.webp", feliz: "img/mumo_feliz.webp" };
+
+  // ══ Utilidades ═══════════════════════════════════════════════
+  function esc(t) { return String(t == null ? "" : t).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  function hablar(texto) {
+    try {
+      if (!("speechSynthesis" in window)) return;
+      var u = new SpeechSynthesisUtterance(texto);
+      u.lang = "es-MX"; u.rate = 0.85;
+      speechSynthesis.cancel(); speechSynthesis.speak(u);
+    } catch (e) {}
+  }
+  function irA(p) { estado.pantalla = p; estado.error = ""; pintar(); window.scrollTo(0, 0); }
+  function botonEscuchar(id) { return "speechSynthesis" in window ? '<button class="btn btn-borde" id="' + id + '" type="button">🔊 Escuchar</button>' : ""; }
+  function cargandoHtml(texto) {
+    return '<div class="mumo-centro"><img src="' + MUMO.pensando + '" alt="Mumo pensando" height="100" style="height:100px;width:auto"><p class="pensando">' + esc(texto) + '</p><div class="spinner" role="status" aria-label="Cargando"></div></div>';
+  }
+  function $(id) { return document.getElementById(id); }
+
+  // ══ Pantallas ════════════════════════════════════════════════
+  function pantallaInicio() {
+    var opciones = PERFILES.map(function (p) { return '<option' + (p === estado.perfil ? " selected" : "") + ">" + esc(p) + "</option>"; }).join("");
+    return '<section class="pantalla">' +
+      '<div class="mumo-saluda"><img src="' + MUMO.saludando + '" alt="Mumo saludando" height="120"><p class="burbuja">¡Hola! Soy Mumo. Dime a dónde vas y te llevo paso a paso.</p></div>' +
+      '<form id="form-ruta" class="pantalla" novalidate>' +
+        '<div class="campo"><label for="origen">📍 ¿Dónde estás?</label><div class="input"><span aria-hidden="true">🎯</span><input id="origen" autocomplete="off" placeholder="Ej. Metro Insurgentes" value="' + esc(estado.origen) + '"></div></div>' +
+        '<div class="campo"><label for="destino">🏁 ¿A dónde vas?</label><div class="input"><span aria-hidden="true">🚩</span><input id="destino" autocomplete="off" placeholder="Ej. UVM Campus Reforma" value="' + esc(estado.destino) + '"></div></div>' +
+        '<div class="campo"><label for="perfil">🧑‍🦽 ¿Qué necesitas?</label><select id="perfil">' + opciones + '</select></div>' +
+        '<div class="campo"><label for="telefono">📞 Teléfono de mi familiar (opcional)</label><div class="input"><span aria-hidden="true">☎️</span><input id="telefono" type="tel" inputmode="tel" placeholder="Escribe el teléfono" value="' + esc(estado.telefono) + '"></div></div>' +
+        (estado.error ? '<p class="error" role="alert">' + esc(estado.error) + "</p>" : "") +
+        (estado.cargando ? cargandoHtml("Mumo está pensando...") :
+          '<button class="btn btn-lleno btn-grande" type="submit">🐾 Crear mi ruta</button>') +
+      "</form>" +
+      (estado.cargando ? "" : '<button class="btn btn-borde" id="btn-donde" type="button">📷 ¿Dónde estoy?</button>') +
+      "</section>";
+  }
+
+  function pantallaRuta() {
+    if (!estado.ruta || !estado.ruta.pasos || !estado.ruta.pasos.length) {
+      return '<section class="pantalla"><div class="mumo-dice">🐶 <span>Ups, no tengo una ruta. Volvamos al inicio.</span></div><button class="btn btn-lleno" id="btn-inicio" type="button">🏠 Volver al inicio</button></section>';
+    }
+    var pasos = estado.ruta.pasos, total = pasos.length, i = estado.pasoActual, p = pasos[i];
+    var barras = pasos.map(function (_, k) { return '<span class="' + (k <= i ? "on" : "") + '"></span>'; }).join("");
+    var aviso = estado.ruta.aviso;
+    var ultimo = i === total - 1;
+    return '<section class="pantalla">' +
+      "<h1>Paso " + (i + 1) + " de " + total + "</h1>" +
+      '<div class="progreso" aria-hidden="true">' + barras + "</div>" +
+      '<div class="meta">' + (aviso ? '<span class="chip-demo">Modo demo</span>' : "") +
+        '<span class="ruta-nombre">' + esc(estado.origen) + " → " + esc(estado.destino) + "</span></div>" +
+      (aviso ? '<p class="aviso-amarillo">' + esc(aviso) + "</p>" : "") +
+      '<div class="tarjeta paso-principal"><span class="emoji" aria-hidden="true">' + esc(p.emoji || "🧭") + "</span><p>" + esc(p.instruccion) + "</p></div>" +
+      '<div class="tarjeta dato"><span class="ico" aria-hidden="true">👀</span><span>Busca: ' + esc(p.referencia) + "</span></div>" +
+      '<div class="tarjeta dato"><span class="ico" aria-hidden="true">♿</span><span>Accesibilidad: ' + esc(p.accesibilidad) + "</span></div>" +
+      botonEscuchar("btn-oir-paso") +
+      '<div class="fila"><button class="btn btn-borde" id="btn-ant" type="button"' + (i === 0 ? " disabled" : "") + '>← Anterior</button>' +
+        '<button class="btn btn-lleno" id="btn-sig" type="button">' + (ultimo ? "🎉 ¡Llegué!" : "Siguiente →") + "</button></div>" +
+      '<button class="btn btn-lleno" id="btn-voy-bien" type="button">📷 ¿Voy bien?</button>' +
+      '<button class="btn btn-borde" id="btn-inicio" type="button">🏠 Volver al inicio</button>' +
+      "</section>";
+  }
+
+  function zonaFoto(foto) {
+    if (foto) return '<img class="foto-previa" src="' + foto + '" alt="Tu foto">';
+    return '<div class="zona-foto" id="zona-foto" role="button" tabindex="0"><span class="cam" aria-hidden="true">📷</span>Toca para tomar foto</div>';
+  }
+  function botonesFoto() {
+    return '<div class="fila"><button class="btn btn-lleno" id="btn-camara" type="button">📷 Tomar foto</button><button class="btn btn-borde" id="btn-galeria" type="button">🖼️ Galería</button></div>';
+  }
+
+  function pantallaVoyBien() {
+    var r = estado.resultadoVoyBien, res = "";
+    if (r) {
+      var titulos = { si: "✅ ¡Vas bien!", no: "⚠️ Parece que no es por aquí", no_seguro: "🤔 No estoy seguro" };
+      var vb = titulos[r.va_bien] ? r.va_bien : "no_seguro";
+      res = '<div class="resultado"><h2 class="' + vb + '">' + titulos[vb] + "</h2>" +
+        '<div class="tarjeta"><strong>Lo que veo</strong><span>' + esc(r.que_veo) + "</span></div>" +
+        '<div class="tarjeta"><strong>Qué hacer</strong><span>' + esc(r.que_hacer) + "</span></div>" +
+        '<div class="mumo-dice">🐶 <span>' + esc(r.mensaje_mumo) + "</span></div>" +
+        botonEscuchar("btn-oir-voy") + "</div>";
+    }
+    return '<section class="pantalla"><h1>📷 ¿Voy bien?</h1><p class="ayuda">Toma una foto del letrero o señal que ves.</p>' +
+      zonaFoto(estado.fotoVoyBien) + (estado.cargando ? cargandoHtml("Mumo está mirando tu foto...") : botonesFoto() + res) +
+      '<button class="btn btn-borde" id="btn-volver-paso" type="button">🐾 Volver a mi paso</button></section>';
+  }
+
+  function pantallaDonde() {
+    var r = estado.resultadoDonde, res = "";
+    if (r) {
+      var nivel = ["alta", "media", "baja"].indexOf(r.seguridad) >= 0 ? r.seguridad : "baja";
+      res = '<div class="resultado"><h2>📍 ' + esc(r.lugar) + "</h2>" +
+        '<div class="tarjeta"><strong>Lo que vi</strong><span>' + esc(r.pistas) + "</span></div>" +
+        '<div class="tarjeta"><strong>Qué tan seguro estoy</strong><span><span class="nivel ' + nivel + '">' + nivel + "</span></span></div>" +
+        '<div class="tarjeta"><strong>Qué hacer</strong><span>' + esc(r.que_hacer) + "</span></div>" +
+        '<div class="mumo-dice">🐶 <span>' + esc(r.mensaje_mumo) + "</span></div>" +
+        botonEscuchar("btn-oir-donde") +
+        (nivel !== "baja" ? '<button class="btn btn-lleno" id="btn-desde-aqui" type="button">🐾 Empezar mi ruta desde aquí</button>' : "") +
+        "</div>";
+    }
+    return '<section class="pantalla"><h1>📍 ¿Dónde estoy?</h1><p class="ayuda">Toma una foto de un letrero, calle o estación.</p>' +
+      zonaFoto(estado.fotoDonde) + (estado.cargando ? cargandoHtml("Mumo está mirando tu foto...") : botonesFoto() + res) +
+      '<button class="btn btn-borde" id="btn-inicio" type="button">🏠 Volver al inicio</button></section>';
+  }
+
+  function pantallaLlegaste() {
+    var msg = (estado.ruta && estado.ruta.mensaje_mumo) || "¡Guau! Lo logramos juntos.";
+    return '<section class="pantalla llegaste"><div class="mumo-centro"><img src="' + MUMO.feliz + '" alt="Mumo feliz" style="height:200px;width:auto"></div>' +
+      "<h1>¡Llegaste! " + esc(msg) + "</h1>" +
+      '<button class="btn btn-lleno btn-grande" id="btn-nueva" type="button">🏠 Nueva ruta</button></section>';
+  }
+
+  // ══ Dibujar y conectar eventos ═══════════════════════════════
+  var fotoDestino = "voy_bien";
+  function pintar() {
+    var vistas = { inicio: pantallaInicio, ruta: pantallaRuta, voy_bien: pantallaVoyBien, donde_estoy: pantallaDonde, llegaste: pantallaLlegaste };
+    $("contenido").innerHTML = (vistas[estado.pantalla] || pantallaInicio)();
+
+    pintarLlamar();
+
+    function al(id, fn) { var el = $(id); if (el) el.addEventListener("click", fn); }
+
+    var form = $("form-ruta");
+    if (form) {
+      ["origen", "destino", "telefono"].forEach(function (k) {
+        $(k).addEventListener("input", function (e) { estado[k] = e.target.value; guardar(); if (k === "telefono") pintarLlamar(); });
+      });
+      $("perfil").addEventListener("change", function (e) { estado.perfil = e.target.value; guardar(); });
+      form.addEventListener("submit", function (e) {
+        e.preventDefault();
+        if (!estado.origen.trim() || !estado.destino.trim()) { estado.error = "🐶 Escribe de dónde sales y a dónde vas."; pintar(); return; }
+        estado.cargando = true; estado.error = ""; pintar();
+        pedirRuta(estado.origen.trim(), estado.destino.trim(), estado.perfil).then(function (ruta) {
+          estado.ruta = ruta; estado.pasoActual = 0; estado.cargando = false; irA("ruta");
+        });
+      });
+    }
+    al("btn-donde", function () { estado.fotoDonde = null; estado.resultadoDonde = null; irA("donde_estoy"); });
+    al("btn-inicio", function () { irA("inicio"); });
+    al("btn-nueva", function () { estado.ruta = null; estado.destino = ""; guardar(); irA("inicio"); });
+    al("btn-ant", function () { if (estado.pasoActual > 0) { estado.pasoActual--; pintar(); } });
+    al("btn-sig", function () {
+      if (estado.pasoActual < estado.ruta.pasos.length - 1) { estado.pasoActual++; pintar(); } else { irA("llegaste"); }
+    });
+    al("btn-voy-bien", function () { estado.fotoVoyBien = null; estado.resultadoVoyBien = null; irA("voy_bien"); });
+    al("btn-volver-paso", function () { irA("ruta"); });
+    al("btn-desde-aqui", function () { estado.origen = estado.resultadoDonde.lugar; guardar(); irA("inicio"); });
+    al("btn-oir-paso", function () {
+      var p = estado.ruta.pasos[estado.pasoActual];
+      hablar("Paso " + (estado.pasoActual + 1) + ". " + p.instruccion + ". Busca: " + p.referencia + ". Accesibilidad: " + p.accesibilidad + ".");
+    });
+    al("btn-oir-voy", function () {
+      var r = estado.resultadoVoyBien, t = { si: "¡Vas bien!", no: "Parece que no es por aquí", no_seguro: "No estoy seguro" }[r.va_bien] || "No estoy seguro";
+      hablar(t + ". " + r.que_veo + ". " + r.que_hacer + ". " + r.mensaje_mumo);
+    });
+    al("btn-oir-donde", function () { var r = estado.resultadoDonde; hablar("Estás en " + r.lugar + ". " + r.pistas + ". " + r.que_hacer + ". " + r.mensaje_mumo); });
+
+    fotoDestino = estado.pantalla;
+    al("btn-camara", function () { $("in-camara").click(); });
+    al("btn-galeria", function () { $("in-galeria").click(); });
+    var zona = $("zona-foto");
+    if (zona) {
+      zona.addEventListener("click", function () { $("in-camara").click(); });
+      zona.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); $("in-camara").click(); } });
+    }
+  }
+  function pintarLlamar() {
+    var tel = estado.telefono.replace(/[^\d+]/g, ""), llamar = $("btn-llamar");
+    llamar.hidden = !tel;
+    if (tel) { llamar.href = "tel:" + tel; $("tel-visible").textContent = "· " + estado.telefono; }
+  }
+
+  function alElegirFoto(e) {
+    var archivo = e.target.files && e.target.files[0];
+    e.target.value = "";
+    if (!archivo) return;
+    var lector = new FileReader();
+    lector.onload = function () {
+      estado.cargando = true;
+      if (fotoDestino === "voy_bien") {
+        estado.fotoVoyBien = lector.result; estado.resultadoVoyBien = null; pintar();
+        var paso = estado.ruta && estado.ruta.pasos ? estado.ruta.pasos[estado.pasoActual] : {};
+        enviarFoto("/api/voy-bien", archivo, { paso_json: JSON.stringify(paso) }, VOY_BIEN_RESPALDO).then(function (r) {
+          estado.resultadoVoyBien = r; estado.cargando = false; pintar();
+        });
+      } else {
+        estado.fotoDonde = lector.result; estado.resultadoDonde = null; pintar();
+        enviarFoto("/api/donde-estoy", archivo, {}, DONDE_RESPALDO).then(function (r) {
+          estado.resultadoDonde = r; estado.cargando = false; pintar();
+        });
+      }
+    };
+    lector.readAsDataURL(archivo);
+  }
+  $("in-camara").addEventListener("change", alElegirFoto);
+  $("in-galeria").addEventListener("change", alElegirFoto);
+
+  // ══ Letra grande ═════════════════════════════════════════════
+  var lg = $("letra-grande");
+  try { if (localStorage.getItem("mova-letra-grande") === "1") { lg.checked = true; document.documentElement.classList.add("grande"); } } catch (e) {}
+  lg.addEventListener("change", function () {
+    document.documentElement.classList.toggle("grande", lg.checked);
+    try { localStorage.setItem("mova-letra-grande", lg.checked ? "1" : "0"); } catch (e) {}
+  });
+
+  // Revisa si el servidor está encendido
+  conTiempo(fetch(API + "/")).then(function (r) { marcarApi(r.ok); }).catch(function () { marcarApi(false); });
+
+  pintar();
+})();
+</script>
+</body>
+</html>

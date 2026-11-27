@@ -18,6 +18,7 @@ import tomllib
 from google import genai
 from fastapi import FastAPI, File, UploadFile, Form
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 # ── Leer la API key de Gemini (misma que usa Streamlit) ──────────────
 with open(".streamlit/secrets.toml", "rb") as f:
@@ -48,6 +49,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+# Sitio web de Mova (carpeta website/): abre http://localhost:8000/sitio/
+app.mount("/sitio", StaticFiles(directory="website", html=True), name="sitio")
 
 
 @app.get("/")
