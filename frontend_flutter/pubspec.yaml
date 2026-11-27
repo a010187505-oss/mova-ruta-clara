@@ -1,0 +1,35 @@
+name: frontend_flutter
+description: "Mova · Ruta Clara — App de navegación accesible con IA"
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.14.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  # Llamadas HTTP al backend
+  http: ^1.4.0
+  # Tomar o elegir fotos
+  image_picker: ^1.1.2
+  # Abrir enlaces tel: para llamar al familiar
+  url_launcher: ^6.3.1
+  # Leer texto en voz alta (usa Web Speech API en Chrome)
+  flutter_tts: ^4.2.0
+  # Estado global sencillo
+  provider: ^6.1.2
+  camera: ^0.12.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/logo.png
+    - assets/mumo_saludando.jpg
+    - assets/mumo_pensando.jpg
+    - assets/mumo_feliz.jpg

@@ -1,4 +1,6 @@
 streamlit
 google-genai
 gTTS
-
+fastapi
+uvicorn
+python-multipart

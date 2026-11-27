@@ -9,12 +9,13 @@ from backend.gemini_service import generar_ruta, validar_foto, detectar_lugar
 st.set_page_config(page_title="Mova · Ruta Clara", page_icon="🐶", layout="centered")
 
 # Imagenes de Mumo y logo (hechas por Maren)
-ASSETS = "mobile/assets"
+# (Usamos las mismas imagenes que la app Flutter para que todo se vea igual)
+ASSETS = "frontend_flutter/assets"
 IMG = {
     "logo": f"{ASSETS}/logo.png",
-    "saludando": f"{ASSETS}/mumo saludando.jpg",
-    "pensativo": f"{ASSETS}/mumo pensativo.jpg",
-    "feliz": f"{ASSETS}/mumo feliz.jpg",
+    "saludando": f"{ASSETS}/mumo_saludando.jpg",
+    "pensativo": f"{ASSETS}/mumo_pensando.jpg",
+    "feliz": f"{ASSETS}/mumo_feliz.jpg",
 }
 
 # Memoria de la app (en que pantalla estamos, la ruta, el paso, etc.)
