@@ -77,7 +77,13 @@ flutter pub get
 flutter run -d chrome
 ```
 
-### 2B. Versión Streamlit (respaldo)
+### 2B. Sitio web (sin instalar Flutter)
+Con el servidor encendido (`uvicorn api_server:app --port 8000`), abre http://localhost:8000/sitio/.
+Tiene las mismas pantallas que la app: crear ruta, ¿Voy bien?, ¿Dónde estoy?, escuchar, letra grande y llamar a tu familiar.
+Si el servidor no responde, el sitio usa la ruta de ejemplo, igual que la app.
+Los archivos están en `website/`.
+
+### 2C. Versión Streamlit (respaldo)
 ```powershell
 .venv\Scripts\activate
 streamlit run app.py
